@@ -12,7 +12,7 @@ import io
 
 st.set_page_config(page_title="Carga de Tickets de Peso", page_icon="🚛", layout="centered")
 
-st.title("🚛 Registro de Tickets de Peso")
+st.title("🚛 1 Registro de Tickets de Peso")
 st.write("Sube la foto del ticket de peso para registrarlo en el sistema.")
 
 with st.form("ticket_form", clear_on_submit=True):
