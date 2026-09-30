@@ -11,7 +11,7 @@ from googleapiclient.http import MediaIoBaseUpload
 import io
 
 # Configuración de la interfaz para celulares
-st.set_page_config(page_title="Carga de Tickets de Peso", page_icon="🚛📤", layout="centered")
+st.set_page_config(page_title="Carga de Tickets de Peso", page_icon="🚛", layout="centered")
 
 st.title("🚛 Registro de Tickets de Peso")
 st.write("Sube la foto del ticket de peso para registrarlo en el sistema.")
@@ -37,7 +37,7 @@ def get_drive_service():
     )
     return build("drive", "v3", credentials=creds)
 
-# Función para subir archivo a Drive
+# Función para subir archivo a Drive compatible con cuenta personal
 def upload_to_drive(file_bytes, filename, mimetype):
     service = get_drive_service()
     folder_id = st.secrets["GOOGLE_DRIVE_FOLDER_ID"]
@@ -47,23 +47,22 @@ def upload_to_drive(file_bytes, filename, mimetype):
         'parents': [folder_id]
     }
     
-    media = MediaIoBaseUpload(io.BytesIO(file_bytes), mimetype=mimetype, resumable=True)
+    media = MediaIoBaseUpload(io.BytesIO(file_bytes), mimetype=mimetype, resumable=False)
     
-    # Se añade supportsAllDrives=True para solucionar el error 403 de cuota
+    # Subida simple sin carga reanudable pesada para cuentas personales
     uploaded_file = service.files().create(
         body=file_metadata,
         media_body=media,
-        fields='id, webViewLink',
-        supportsAllDrives=True
+        fields='id, webViewLink'
     ).execute()
     
     return uploaded_file.get('webViewLink')
 
-# Función para enviar el correo corporativo
+# Función para enviar el correo
 def send_email(filename, drive_url, conductor, num_ticket, file_bytes):
     sender_email = st.secrets["SENDER_EMAIL"]
     sender_password = st.secrets["SENDER_PASSWORD"]
-    mailing_list = st.secrets["MAILING_LIST"].split(",")
+    mailing_list = [email.strip() for email in st.secrets["MAILING_LIST"].split(",") if email.strip()]
 
     msg = MIMEMultipart()
     msg['From'] = sender_email
@@ -89,7 +88,7 @@ def send_email(filename, drive_url, conductor, num_ticket, file_bytes):
     part.add_header("Content-Disposition", f"attachment; filename= {filename}")
     msg.attach(part)
 
-    # Conexión SMTP Gmail Corporativo
+    # Conexión SMTP
     server = smtplib.SMTP("smtp.gmail.com", 587)
     server.starttls()
     server.login(sender_email, sender_password)
