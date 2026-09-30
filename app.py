@@ -13,7 +13,7 @@ import io
 # Configuración de la interfaz para celulares
 st.set_page_config(page_title="Carga de Tickets de Peso", page_icon="🚛", layout="centered")
 
-st.title("🚛 Registro de Tickets de Peso")
+st.title("🚛📤 Registro de Tickets de Peso")
 st.write("Sube la foto del ticket de peso para registrarlo en el sistema.")
 
 # Formulario para el conductor
