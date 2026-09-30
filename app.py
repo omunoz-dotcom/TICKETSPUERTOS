@@ -33,7 +33,7 @@ with st.form("ticket_form", clear_on_submit=True):
 def get_drive_service():
     creds_dict = json.loads(st.secrets["GOOGLE_CREDENTIALS_JSON"])
     creds = Credentials.from_service_account_info(
-        creds_dict, scopes=["https://www.googleapis.com/auth/drive.file"]
+        creds_dict, scopes=["https://www.googleapis.com/auth/drive"]
     )
     return build("drive", "v3", credentials=creds)
 
@@ -48,10 +48,13 @@ def upload_to_drive(file_bytes, filename, mimetype):
     }
     
     media = MediaIoBaseUpload(io.BytesIO(file_bytes), mimetype=mimetype, resumable=True)
+    
+    # Se añade supportsAllDrives=True para solucionar el error 403 de cuota
     uploaded_file = service.files().create(
         body=file_metadata,
         media_body=media,
-        fields='id, webViewLink'
+        fields='id, webViewLink',
+        supportsAllDrives=True
     ).execute()
     
     return uploaded_file.get('webViewLink')
